@@ -5,24 +5,27 @@
 
 import yaml,os
 
-from PROJECTPATH import *
+# from PROJECTPATH import *
 
 from frame_node import FrameNode
 
 import rospy,time
-from ur3_kinematics import *
+# from ur3_kinematics import *
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
 # from demo_singlercr.msg import rcr, sensorArduino
-from jacobian import *
-from ur_move import UR
+# from jacobian import *
+# from ur_move import UR
 import math
+from ur_move_st import robot
+
 
 class URNode(FrameNode):
     def __init__(self):
         super(URNode, self).__init__()
         self.rate = 50
-        self.ur = UR(0)
+        self.ur = robot()
+        # self.ur = UR(0)
 
     def init(self):
         self.init_node('ur_node')

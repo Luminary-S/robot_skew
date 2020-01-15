@@ -20,7 +20,7 @@ Optional library: matplotlib
 '''
 
 import numpy as np
-
+import math
 '''
 *** BASIC HELPER FUNCTIONS ***
 '''
@@ -218,6 +218,25 @@ def TransToRp(T):
     """
     T = np.array(T)
     return T[0: 3, 0: 3], T[0: 3, 3]
+
+def r2Euler(R):
+    """convert a rotation matrix into a euler angles"""
+    sy = math.sqrt(R[0,0] * R[0,0] +  R[1,0] * R[1,0])
+    singular = sy < 1e-6
+    if  not singular:
+        x = math.atan2(R[2,1] , R[2,2])
+        y = math.atan2(-R[2,0], sy)
+        z = math.atan2(R[1,0], R[0,0])
+    else :
+        x = math.atan2(-R[1,2], R[1,1])
+        y = math.atan2(-R[2,0], sy)
+        z = 0
+    #print('dst:', R)
+
+    x = x*180.0/3.141592653589793
+    y = y*180.0/3.141592653589793
+    z = z*180.0/3.141592653589793
+    return [x,y,z]
 
 def TransInv(T):
     """Inverts a homogeneous transformation matrix

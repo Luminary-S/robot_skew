@@ -1,0 +1,72 @@
+# gui params for ros param server
+
+sensorAr:
+  port: "/dev/ttyUSB0"
+  baud: 9600
+  status: "open"  # "open" or "close"
+
+rcr:
+  port: "/dev/ttyUSB1"
+  baud: 19200
+  status: "open"
+  clean: 0
+  cleanstop: 0
+  pumpcleanrotate: 0
+  pumpcleanstop: 0
+  pumpsewagerotate: 0
+  pumpsewagestop: 0
+  stepUp: 0 # 1 or 0
+  stepDown: 0 #
+  stop: 0
+  up: 0 # 1 or 0
+  down: 0
+  tarHeight: 0
+  tarVel: 0
+  times: 3
+
+camDegree:
+  pitch: 105
+  yaw: 130
+  status: 0
+
+headCam:
+  port: "/dev/video2"
+  status: "open"
+
+baseCam:
+  port: "/dev/video1"
+  status: "close"
+  LSDLen: 300
+  LSDWid: 4.0
+
+imu:
+  port: "/dev/ttyACM0"
+  status: "open"
+
+UR:
+  type: "ur3"
+  status: "open"
+  rate: 30
+  autoclean: 0
+  finishclean: 0
+
+Controller:
+  rate: 30
+  type: "default" # can be chosen to impedance, route, basevision,headvision
+
+impedance:
+  stiffness: 1333
+  status: 0
+
+URroute:
+  len: 140
+  wid: 40
+  status: 0
+
+
+RoofsensorAr:
+  port: "/dev/ttyUSB3"
+  baud: 9600
+  status: "open"  # "open" or "close"
+
+~serial_id: "ttyUSB2"
