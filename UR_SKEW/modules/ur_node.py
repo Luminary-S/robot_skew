@@ -13,18 +13,18 @@ import rospy,time
 # from ur3_kinematics import *
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
-# from demo_singlercr.msg import rcr, sensorArduino
+from demo_ur_skew.msg import rcr, sensorArduino, ft_sensor
 # from jacobian import *
 # from ur_move import UR
 import math
-from ur_move_st import robot
+from ur_move_st import Robot
 
 
 class URNode(FrameNode):
     def __init__(self):
         super(URNode, self).__init__()
         self.rate = 50
-        self.ur = robot()
+        self.ur = Robot()
         # self.ur = UR(0)
 
     def init(self):
@@ -33,10 +33,18 @@ class URNode(FrameNode):
         self.define_node_publisher()
         self.define_node_subscriber()
 
+    # def node_init(self):
+    #     self.define_node_publisher()
+    #     self.define_node_subscriber()
+
     def define_node_subscriber(self):
         # img_sub = rospy.Subscriber('/baseCamImage', Image, self.callback_basecam, queue_size=1)
         joint_sub = rospy.Subscriber("/joint_states", JointState, self.callback_joint)
         # sensor_sub = rospy.Subscriber("/sensor_data", sensorArduino, self.callback_sensorAr, queue_size=1)
+        force_sub = rospy.Subscriber("/robotiq_ft_sensor", ft_sensor, self.callback_ft_sensor, queue_size=1)
+
+    def callback_ft_sensor(self, msg):
+        self.force = [msg.Fx, msg.Fy, msg.Fz, msg.Mx, msg.My, msg.Mz] 
 
     def define_node_publisher(self):
         self.joint_pub = rospy.Publisher("/ur_driver/URScript", String, queue_size=10)
@@ -76,9 +84,20 @@ class URNode(FrameNode):
         t = 0
         vel = 0.3
         ace = 0.2
-        # q_in = getpi(q)
+        # q_in = self.getpi(q)
+        self.set_moveType("fld")
+        self.ur_move_to_point(self.joint_pub,q)
+
+    def ur_movejp_to_point(self, pub, q ):
+        t,vel,ace = self.set_ur_pub_params()
+        t = 0
+        vel = 0.3
+        ace = 0.2
+        # q_in = self.getpi(q)
+        self.set_moveType("flp")
+        self.ur_move_to_point(self.joint_pub,q)
         # self.urscript_pub_movel( pub, q, vel, ace, t )
-        self.urscript_pub( pub, q, vel, ace, t )
+        # self.urscript_pub( pub, q_in, vel, ace, t )
 
     def set_ur_pub_params(self):
         self.t = 0
@@ -139,35 +158,6 @@ class URNode(FrameNode):
         # ss="movej([-0.09577000000000001, -1.7111255555555556, 0.7485411111111111, 0.9948566666666667, 1.330836666666667, 2.3684322222222223], a=1.0, v=1.0,t=5)"
         pub.publish(ss)
     
-    def ur_step_move_test(self, q, direction):
-        pub = self.joint_pub
-        qd = q
-        try:
-            if direction  == "down":
-                qd = self.ur.ur_step_move_down(q)
-            elif direction == "up": 
-                print("enter up...")
-                # q = self.ur.get_q()
-                qd = self.ur.ur_step_move_up(q)
-                # qd = self.ur.ur_step_move_up(q)
-            elif direction == "back": 
-                qd = self.ur.ur_step_move_backward(q)
-            elif direction == "forward": 
-                qd = self.ur.ur_step_move_forward(q)
-            elif direction == "right": 
-                qd = self.ur.ur_step_move_right(q)
-            elif direction == "left": 
-                qd = self.ur.ur_step_move_left(q)
-            elif direction == "stop":
-                self.ur_stop()
-
-            # print("direction: ",direction)
-            print("qd: ",qd)
-            # self.ur_movej_to_point(pub, qd)
-            self.ur_move_to_point(pub,qd)
-        except KeyError as e:
-            print("no step cmd getta!")
-
     def getpi(self, l):
         res = []
         print(l)
@@ -181,17 +171,71 @@ class URNode(FrameNode):
             res.append(  i*180 / math.pi )
         return res
     
-    def spin(self):
-        rate = self.Rate(self.rate)
-        pos0 = [0.17, -78.88, 49.33, -149.68, -89.77, 268.29]
-        pos1 =  [ -0.30, -119.21, 119.79, -178.76, -89.86, 267.45]
-        pos = pos1
-        while not self.is_shutdown():
-            self.get_rosparams()
-            self.set_moveType("sjd")
+    # def spin(self):
+    #     rate = self.Rate(self.rate)
+    #     pos0 = [0.17, -78.88, 49.33, -149.68, -89.77, 268.29]
+    #     pos1 =  [ -0.30, -119.21, 119.79, -178.76, -89.86, 267.45]
+    #     pos = pos1
+    #     while not self.is_shutdown():
+    #         self.get_rosparams()
+    #         self.set_moveType("sjd")
             
-            self.ur_move_to_point(self.joint_pub, pos)
-            pos = pos0
+    #         self.ur_move_to_point(self.joint_pub, pos)
+    #         pos = pos0
+    #         rate.sleep()
+
+    def ik_test(self, status):
+        pub = self.joint_pub
+        # p1 = []
+        # self.ur_move_to_point(pub, p1)
+        direction_list = [ "up", "down", "back", "forward", "left", "right", "start", "stop", "init" ]
+        direction = direction_list[status]
+        print("direction:",direction)
+        # len = 0.04
+        q = self.now_ur_pos
+        if direction == "start":
+            self.set_moveType("sjd")
+            self.ur_move_to_point(pub, [-47.723,-52.315,115.869,-56.231,54.547,256.017])
+        elif direction  == "down":
+            qd = self.ur.ur_step_move_down(q)
+            self.ur_movej_to_point(pub,qd)
+        elif direction == "up": 
+            print("enter up...")
+            # q0 =[-47.723,-52.315,115.869,-56.231,54.547,256.017]
+            # q0 = self.getpi(q0)
+            # print("init pos:", self.ur.FK(q0))
+            # q = self.ur.get_q()
+            qd = self.ur.ur_step_move_up(q)
+            # print("qd",qd)
+            # self.ur_movej_to_point(pub,qd)
+            # qd = self.ur.ur_step_move_up(q)
+        elif direction == "back": 
+            qd = self.ur.ur_step_move_backward(q)
+            self.ur_movej_to_point(pub,qd)
+        elif direction == "forward": 
+            qd = self.ur.ur_step_move_forward(q)
+            self.ur_movej_to_point(pub,qd)
+        elif direction == "right": 
+            qd = self.ur.ur_step_move_right(q)
+            self.ur_movej_to_point(pub,qd)
+        elif direction == "left": 
+            qd = self.ur.ur_step_move_left(q)
+            self.ur_movej_to_point(pub,qd)
+        elif direction == "stop":
+            self.ur_stop()
+    
+    def spin_ik_test(self):
+        rate = self.Rate(self.rate)
+        while not self.is_shutdown():
+            # self.get_rosparams()    
+            try:
+                inp = input("direction? [0,1,2,3,4,5,6,7], [up, down, back, forward, left, right, init, stop]: ")  #in python3ï¼Œ no function raw_input,input gets string
+                # if inp == "q":
+                #     break
+                self.ik_test(int(inp))
+            except KeyboardInterrupt:
+                rospy.signal_shutdown("KeyboardInterrupt")
+                raise
             rate.sleep()
 
     
@@ -199,4 +243,5 @@ class URNode(FrameNode):
 if __name__=="__main__":
     ur_robot = URNode()
     ur_robot.init()
-    ur_robot.spin()
+    ur_robot.ur.set_UR_ROBOT("ur3")
+    ur_robot.spin_ik_test()

@@ -238,6 +238,22 @@ def r2Euler(R):
     z = z*180.0/3.141592653589793
     return [x,y,z]
 
+def Q2r(quaternion):
+    """Return an equivalent rotation matrix.
+
+    @rtype: 3x3 orthonormal rotation matrix
+    @return: equivalent rotation matrix
+    """
+    quaternion = [0.0124099622098, 0.998646117238, 0.000415529209918, -0.0505148760238]
+    s = quaternion[0]
+    x = quaternion[1]
+    y = quaternion[2]
+    z = quaternion[3]
+
+    return np.matrix([[1 - 2 * (y ** 2 + z ** 2), 2 * (x * y - s * z), 2 * (x * z + s * y)],
+                    [2 * (x * y + s * z), 1 - 2 * (x ** 2 + z ** 2), 2 * (y * z - s * x)],
+                    [2 * (x * z - s * y), 2 * (y * z + s * x), 1 - 2 * (x ** 2 + y ** 2)]])
+
 def TransInv(T):
     """Inverts a homogeneous transformation matrix
 
@@ -762,7 +778,7 @@ def IKinBody(Blist, M, T, thetalist0, eomg, ev):
     """
     thetalist = np.array(thetalist0).copy()
     i = 0
-    maxiterations = 20
+    maxiterations = 30
     Vb = se3ToVec(MatrixLog6(np.dot(TransInv(FKinBody(M, Blist, \
                                                       thetalist)), T)))
     err = np.linalg.norm([Vb[0], Vb[1], Vb[2]]) > eomg \

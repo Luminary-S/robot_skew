@@ -1,14 +1,14 @@
 <launch>
-    <arg name="pkg_name"  default="demo_ur_gui" />
+    <arg name="pkg_name"  default="demo_ur_skew" />
         
     <!-- ur3_bringup 0000-->
-    <include file="$(find ur_modern_driver)/launch/ur3_bringup.launch">
+    <!-- <include file="$(find ur_modern_driver)/launch/ur3_bringup.launch">
         <arg name="limited" value="true" />
         <arg name="robot_ip" value="192.168.1.103" />
-    </include>
+    </include> -->
 
     <!-- UR controller GUI -->
-    <node name="ur_GUI_panel" pkg="$(arg pkg_name)" type="ur_gui_run.py" output="screen" >
+    <node name="ur_control_skew" pkg="$(arg pkg_name)" type="skew_0115.py" output="screen" >
     </node>
 
 </launch>
