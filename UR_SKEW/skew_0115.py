@@ -5,20 +5,23 @@
 
 import yaml,os
 import rospy,time
+import sys
+sys.path.append(".")
+# import package
 
 from std_msgs.msg import String, Float32
 # import cv2
 # from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import JointState, Image
-# from demo_ur_skew.msg import rcr, sensorArduino, ft_sensor
-from frame_node import FrameNode
 
-from .modules.ur_node import URNode
-# from rcr_controller import RCRController
-# from ur_controller import URController
+from frame_node import FrameNode
 import numpy as np
-from .modules.kin_algorithm import Algorithm
-from .modules.imu_node import IMUNode
+
+# from . import modules.IMUNode
+from modules.kin_algorithm import Algorithm
+from modules.imu_node import IMUNode
+from modules.ur_node import URNode
+
 
 class demoController(FrameNode):
     def __init__(self):
@@ -32,8 +35,8 @@ class demoController(FrameNode):
         # self.camCtr = CAMController()
 
     def init(self):
-        self.init_node('demo_200114 node ')
-        self.loginfo("start demo_200114 node...")
+        self.init_node("demo_200114_node")
+        self.loginfo("start demo 200114 node...")
         self.ur.node_init()
         self.imu.node_init()
         self.init_variables()
@@ -50,21 +53,25 @@ class demoController(FrameNode):
         clean_times = 3
         pub = self.ur.joint_pub
         if status is "init":
+            self.loginfo("===== 1. init stage =====")
             q_init = [-47.728,-52.309,115.85,-56.205,54.543,255.993]
             self.ur.ur_movej_to_point(pub, q_init)
             rospy.sleep(5)
             status = "start"
         elif status is "start":
+            self.loginfo("===== 2. start cleaning stage =====")
             flag = self.start()
             if flag is True:
                 status = "touch"
         elif status is "touch":
+            self.loginfo("===== 3. touch stage =====")
             flag = self.touch()
             if flag is True:
                 status = "touch"
             else:
-                status = "clean"
+                status = "init"
         elif status is "clean":
+            self.loginfo("===== 4."+ str(self.clean_times)+" cleaning  stage =====" )
             flag = self.clean()
             if flag is False:
                 status = "right"
@@ -78,6 +85,7 @@ class demoController(FrameNode):
                     status = "init"
             # else:
         elif status is "right":
+            self.loginfo("===== 5."+ str(self.clean_times)+" moving stage =====" )
             self.right()
             rospy.sleep(3)
             status = "clean"

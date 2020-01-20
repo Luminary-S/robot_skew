@@ -139,7 +139,7 @@ class Algorithm():
         return dq
     
     def imp_controller(self, F,q):
-        Fi = np.array([43.5,21.5,12.5,21.3,22,13])
+        Fi = np.array([-3.37249994278,-1.58649992943,52.2024993896,0.0797999948263,1.27394998074,0.13014999032])
         Fd = np.array([60,21.5,12.5,21.3,22,13])
         V_force = self.imp_part(F,Fd, Fi)
         V = V_force

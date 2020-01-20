@@ -38,7 +38,7 @@ class IMUNode(FrameNode):
 
     def define_node_subscriber(self):
         # img_sub = rospy.Subscriber('/baseCamImage', Image, self.callback_basecam, queue_size=1)
-        imu_sub = rospy.Subscriber("/imu_data", Imu, self.callback_imu)
+        imu_sub = rospy.Subscriber("/imu", Imu, self.callback_imu)
         # sensor_sub = rospy.Subscriber("/sensor_data", sensorArduino, self.callback_sensorAr, queue_size=1)
 
     def define_node_publisher(self):

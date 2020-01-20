@@ -1,0 +1,61 @@
+<launch>
+    <arg name="pkg_name"  default="demo_ur_skew" />
+        
+    <!-- load params in yaml file -->
+    <rosparam file="$(find demo_singlercr)/yaml/gui_params.yaml" command="load" />
+    <!-- <param name="sim" value="true"/> -->
+
+    <!-- start main qt gui  process           1111-->
+    <!-- <node name="rcr_gui" pkg="$(arg pkg_name)" type="run.py"  output="screen" >
+    </node> -->
+    <!-- cam launch -->
+      <!-- usb cam node 22222-->
+    <!-- <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="video_device" value="/dev/video1" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+    </node> -->
+
+    <!-- rqt view window 33333-->
+    <!-- <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/usb_cam/image_raw"/>
+    <param name="autosize" value="true" />
+    </node> -->
+
+    <!-- cam processing node 44444-->
+    <!-- <node name="cam_stain_extractor" pkg="$(arg pkg_name)" type="cam_node_19robio.py"   >
+    </node> -->
+    <!-- <include file="$(find demo_singlercr/launch/demo_19robio.launch">
+
+    </include> -->
+
+    <!-- sensor node  -->
+    <node name="sensor_adruino" pkg="demo_singlercr" type="sensorAr_node.py" output="screen" >
+    </node>
+    
+    <!-- rcr arduino node 5555 -->
+    <node name="rcr_adruino" pkg="demo_singlercr" type="rcr_node.py" output="screen" >
+    </node>
+
+    <!-- robotiq FT300  0000-->
+    <include file="$(find robotiq_ft_sensor)/launch/ft_sensor.launch" />
+
+
+    <!-- IMU startup-->
+    <!-- <launch> ===========  change imu_node.py  rostopic name ================-->
+    <!-- <include file="$(find sensor_startup)/launch/imu_bringup.launch" /> -->
+    <include file="$(find razor_imu_9dof)/launch/razor-pub.launch" />
+      <!-- <node pkg="sensor_startup" type="walking_demo" name="walking_demo" output="screen" /> -->
+    <!-- </launch> -->
+
+    <!-- impedance controller  demo_19robio.py  test_path_impedance_move_node.py 0000-->
+    <!-- <node name="demo 191111 controller" pkg="$(arg pkg_name)" type="demo_191111.py" output="screen" >
+    </node> -->
+
+    <!-- imu launch -->
+
+
+</launch>
